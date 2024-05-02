@@ -1,0 +1,17 @@
+# Volumi
+docker run `
+--name sql2022 `
+-p 1433:1433 `
+-v sqlvolume:/var/opt/mssql `
+-e ACCEPT_EULA=Y -e SA_PASSWORD=a1234567890! `
+-d --rm `
+mcr.microsoft.com/mssql/seerver:2022-latest
+
+docker stop sql2022
+
+# Blind mount
+docker run `
+--name ng `
+-p 8080:80 `
+-v c:/temp/nginx:/usr/.... `
+--rm -d `
