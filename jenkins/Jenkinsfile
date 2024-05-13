@@ -1,0 +1,97 @@
+ pipeline {
+  environment {
+    registry = 'edisys/jenkinsdemo'
+    registryCredential = 'dockerhub'
+    dockerImage = ''
+  }
+  agent any
+
+  stages {
+    stage('Cloning Git') {
+      steps {
+        git branch: 'master', url: 'https://github.com/edisyst/sanza.git'
+      }
+    }
+
+    stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build registry + ":$BUILD_NUMBER"
+        }
+      }
+    }
+
+    stage('Deploy Image') {
+      steps{
+        script {
+          docker.withRegistry( '', registryCredential ) {
+            dockerImage.push()
+          }
+        }
+      }
+    }
+
+    stage('Remove Unused docker image') {
+      steps{
+        sh "docker rmi $registry:$BUILD_NUMBER"
+      }
+    }
+
+    stage('Deploy') {
+        steps {
+            sh "ssh -T root@159.89.6.28 docker rm -f test || true"
+            sh "ssh -T root@159.89.6.28 docker run --name test -p 3000:3000 -d $registry:$BUILD_NUMBER"
+        }
+    }
+
+    stage('remove old images') {
+        steps {
+            sh "ssh -T root@159.89.6.28 docker image prune -a -f"
+        }
+    }
+    /*... */
+  } /* end stages */
+} /* end pipeline */
+
+
+pipeline {
+  environment {
+    registry = 'pierangelo1982/jenkinsdemo'
+    registryCredential = 'dockerhubpierangelo'
+    dockerImage = ''
+  }
+  agent any
+  stages {
+    stage('Cloning Git') {
+      steps {
+        git branch: 'main', url: 'https://github.com/pierangelo1982/demo01.git'
+      }
+    }
+    stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build registry + ":$BUILD_NUMBER"
+        }
+      }
+    }
+    stage('Deploy Image') {
+      steps{
+        script {
+          docker.withRegistry( '', registryCredential ) {
+            dockerImage.push()
+          }
+        }
+      }
+    }
+    stage('Remove Unused docker image') {
+      steps{
+        sh "docker rmi $registry:$BUILD_NUMBER"
+      }
+    }
+    stage('Deploy') {
+        steps {
+            sh "ssh -T root@159.89.6.28 docker run --name test -p 3000:3000 -d $registry:$BUILD_NUMBER"
+        }
+    }
+  }
+}

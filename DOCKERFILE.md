@@ -3,23 +3,55 @@
 - https://docs.docker.com/reference/dockerfile/#from
 - https://github.com/mcicolella/docker-examples
 
+### Struttura base
+```dockerfile
+FROM <nome-immagine> 
+# specifica l’immagine di partenza (viene prima verificato se si trova nei repo locali altrimenti la scarica dal Dockerhub)
 
-```bash
-FROM <nome-immagine> # specifica l’immagine di partenza (viene prima verificato se si trova nei repo locali altrimenti la scarica dal Dockerhub)
+WORKDIR <path> 
+# specifica la directory nel quale i comandi settati su CMD devono essere eseguiti (sennò li esegue nella `root`)
 
-RUN <comando> # esegue uno o più comandi prima della creazione del container
+COPY <file/dir> <path> 
+# copia un file dell’host in una cartella del container. Un esempio classico è COPY . .
 
-ADD <file/dir> <path>  # copia un file dell’host (o un file remoto, tramite URL) in una cartella del container.
+RUN <comando> 
+# esegue dei comandi prima di creare il container (durante la build dell'immagine): tipicamente installazione di pacchetti
 
-COPY <file/dir> <path> # copia un file dell’host in una cartella del container
+ADD <file/dir> <path>  
+# copia un file dell’host (o un file remoto, tramite URL) in una cartella del container.
 
-CMD ["<comando>", "<param1>","<param2>", ...] # specifica uno o più comandi da eseguire (si mettono fra "doppi apici"). Può esserci un solo CMD
+EXPOSE 4000 
+# espone la porta 4000
 
-WORKDIR <path> # specifica la directory nel quale i comandi settati su CMD devono essere eseguiti (sennò li esegue nella `root`)
+CMD ["<comando>", "<param1>","<param2>", ...] 
+# esegue dei comandi in fase di run container (si mettono fra "doppi apici"). Può esserci un solo CMD. E' anche il comando che viene eseguito di default se non ce ne sono altri (es.: il classico /bin/bash per eseguire un container ubuntu)
+
+ENTRYPOINT ["<comando>", "<param1>","<param2>", ...] 
+# simile a CMD, solo che questo comando non si sovrascrive (a meno di non specificare docker run --entrypoint)
 ```
 
-### Nota:
-La differenza tra ADD e COPY è che il primo ha funzionalità maggiori tra cui il poter copiare file remoti all’interno del container tramite URL oppure estrarre un file compresso all’interno del container mentre COPY copia solo i file locali dall’host al container. COPY è stato introdotto per problemi di funzionalità del comando ADD che per via delle sue troppe funzionalità può avere comportamenti inaspettati quando si cerca di copiare un file su un container.
+### Note:
+- `ADD` rispetto a `COPY` ha funzionalità maggiori, tra cui il poter copiare file remoti all’interno del container tramite URL oppure estrarre un file compresso all’interno del container mentre `COPY` copia solo i file locali dall’host al container.
+  - `COPY` è stato introdotto per problemi di funzionalità del comando `ADD` che per via delle sue troppe funzionalità può avere comportamenti inaspettati quando si cerca di copiare un file su un container.
+- `RUN` si può mettere anche più volte, ma l'ideale è combinare tutti i RUN in un'unica riga, perchè ogni RUN genera un nuovo layer che appesantisce l'immagine
+- `CMD` si usa per comandi che possono essere sostiutuiti a runtime; `ENTRYPOINT` per comandi che devono sempre essere eseguiti. 
+  - Le due istruzioni possono anche essere combinate (vedi esempio) 
+
+### Esempio
+```dockerfile
+ARG  CODE_VERSION=stable
+FROM debian:${CODE_VERSION}
+WORKDIR /src
+COPY test.txt relativeDir/
+COPY test.txt /absoluteDir/
+RUN apt-get update && apt-get install -y --force-yes apache2
+ADD git@git.example.com:foo/bar.git /bar
+EXPOSE 80 443
+VOLUME ["/var/www", "/var/log/apache2", "/etc/apache2"]
+ENTRYPOINT ["echo"]
+CMD ["Stò eseguendo il container"]
+```
+
 
 
 # Crea immagine da un Dockerfile
@@ -100,4 +132,26 @@ Da terminale:
 docker build -t flask-webserver 
 docker run flask-webserver
 ```
+
+
+# Esercizio Node JS Express JS
+```bash
+cd mio-node-api
+npm init
+npm install --save express
+node index.js # se vado in localhost:3000 vedo la mia app
+
+docker build -t mio-node-api:latest .
+docker run --name node1 -d mio-node-api -p 3333:3000
+docker run --name node1 -d -p 3333:3000 mio-node-api:latest
+
+docker pull python:3
+docker pull node 
+
+
+
+```
+
+
+
 

@@ -3,9 +3,9 @@
 2. [ ] https://docs.docker.com/guides/docker-concepts/the-basics/what-is-an-image/
 3. [ ] https://docs.docker.com/engine/reference/commandline/cli/
 
-ESERCIZI: https://labs.play-with-docker.com/
+**ESERCIZI**: https://labs.play-with-docker.com/
 
-REPOSITORY: https://hub.docker.com/_/php/tags?page=&page_size=&ordering=&name=8.0-apache
+**REPOSITORY**: https://hub.docker.com/_/php/tags?page=&page_size=&ordering=&name=8.0-apache
 - posso registrarmi e creare un mio repo oppure esaminare quelli esistenti
 
 ---
@@ -72,6 +72,11 @@ docker run <image> <app>
 ```bash
 docker container ls # mostra i container in running
 docker ps           # UGUALE
+
+docker ps --format="ID\t{{.ID}}\nNAME\t{{.Names}}\nImage\t{{.Image}}\nPORTS\t{{.Ports}}\nCOMMAND\t{{.Command}}\nCREATED\t{{.CreatedAt}}\nSTATUS\t{{.Status}}\n"
+export FORMAT="ID\t{{.ID}}\nNAME\t{{.Names}}\nImage\t{{.Image}}\nPORTS\t{{.Ports}}\nCOMMAND\t{{.Command}}\nCREATED\t{{.CreatedAt}}\nSTATUS\t{{.Status}}\n"
+docker ps --format=$FORMAT
+
 docker ps -a        # mostra anche i container stopped
 
 
@@ -131,6 +136,9 @@ docker logs  suspicious_davinci
 ```bash
 docker inspect hello-world # legge il Manifest dell'immagine
 docker container prune # elimina tutti i container non in running
+
+docker export suspicious_davinci > ubuntu.zip # posso esportare un container per passarlo a qualcuno
+docker import - mio_ubuntu < ubuntu.zip #@ così lo importo. OVVIAMENTE HA SENSO FARLO SOLO PER CONTAINER PERSONALIZZATI
 ```
 
 ## Policy di restart dei container
@@ -158,7 +166,7 @@ docker ps
 ```
 
 
-# Esercizio - Web server
+# Esercizio - Web server NGINX
 ```bash
 docker run -d -p 8080:80 nginx # fa il mapping delle porte (host:container)
 docker ps
@@ -193,7 +201,7 @@ Creo l'immagine con PHP e Apache per creare un container che apre una mia `folde
 docker pull php:8.0-apache
 docker run -d --name=server1 php:8.0-apache 
 docker logs server1
-docker run -d --name=server2 -p 8100:80 -v C:\laragon\www\bashbash\DOCKER\folder-php:/var/www/html/ php:8.0-apache
+docker run -d --name=server2 -p 8100:80 -v C:\laragon\www\dockerdocker\folder-php:/var/www/html/ php:8.0-apache
 ```
 `server1` non funge perchè vanno mappati la porta e il volume, al contrario di `server2`
 
@@ -209,37 +217,5 @@ Creo direttamente il `docker-compose.yml` senza scaricare l'immagine mysql
 
 
 - https://www.youtube.com/watch?v=97OFAcndG-4&t=600s
-
-
-# Esercizio - Jenkins - Docker Swarm
-https://www.youtube.com/watch?v=SPVJuNS2Bi4&t=19s
-```bash
-docker pull jenkins/jenkins:lts
-docker run -d --name mio-jenk -p 8081:8080 -p 50001:50000 jenkins/jenkins
-docker ps
-
-docker swarm
-docker swarm init
-docker swarm init --advertise-addre 192.168.0.16 # inserisco il mio IP
-```
-
-```bash
-docker swarm join --token SWMTKN-1-3o42wwkdbanz1qoupsp2ympr4ffkbyzmvj56gdtx0qo7jab70y-392dj3vltlddajkiq3g25fgje 192.168.65.3:2377
-docker swarm join --token SWMTKN-1-4k4q7d1lbsvdoukrkdy8n9qcxnc1is1sysk6gviy2uyvznmns0-d7mjmf89pkdxhrbgbb789biym 192.168.0.17:2377
-```
-
-```bash
-docker node ls
-docker service ls
-docker network ls
-docker inspect bridge
-
-docker service create -d --name serv-jenk -p 80002:8080 jenkins/jenkins
-docker service ls
-docker service ps jenkins
-docker service update jenkins --replicas 5
-docker service ls
-docker service ps jenkins
-```
 
 
