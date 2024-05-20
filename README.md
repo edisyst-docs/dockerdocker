@@ -136,6 +136,7 @@ docker logs  suspicious_davinci
 ```bash
 docker inspect hello-world # legge il Manifest dell'immagine
 docker container prune # elimina tutti i container non in running
+docker commit # per committare sul proprio docker.hub
 
 docker export suspicious_davinci > ubuntu.zip # posso esportare un container per passarlo a qualcuno
 docker import - mio_ubuntu < ubuntu.zip #@ così lo importo. OVVIAMENTE HA SENSO FARLO SOLO PER CONTAINER PERSONALIZZATI

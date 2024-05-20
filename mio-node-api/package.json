@@ -1,0 +1,14 @@
+{
+  "name": "node-api-mio",
+  "version": "1.2.3",
+  "description": "App semplice NODE e Express JS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
