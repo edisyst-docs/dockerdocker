@@ -9,7 +9,7 @@ docker network ls # elenco reti disponibili
 - Di default la rete di ogni container è la `bridge`. IP di container e host sono differenti
 
 ```bash
-docker run --name bridge_cont -it alpine sh #`CTRL+P+Q` per lasciare in esecuzione
+docker run --name bridge_cont -it alpine sh              # `CTRL+P+Q` per lasciare in esecuzione
 docker run --name host_cont --network host -it alpine sh # `CTRL+P+Q` per lasciare in esecuzione
 docker ps
 

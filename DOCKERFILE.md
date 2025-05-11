@@ -24,7 +24,9 @@ EXPOSE 4000
 # espone la porta 4000
 
 CMD ["<comando>", "<param1>","<param2>", ...] 
-# esegue dei comandi in fase di run container (si mettono fra "doppi apici"). Può esserci un solo CMD. E' anche il comando che viene eseguito di default se non ce ne sono altri (es.: il classico /bin/bash per eseguire un container ubuntu)
+# esegue dei comandi in fase di run container (si mettono fra "doppi apici"). Può esserci un solo CMD. 
+# è anche il comando che viene eseguito di default se non ce ne sono altri 
+# (es.: il classico /bin/bash per eseguire un container ubuntu)
 
 ENTRYPOINT ["<comando>", "<param1>","<param2>", ...] 
 # simile a CMD, solo che questo comando non si sovrascrive (a meno di non specificare docker run --entrypoint)
@@ -147,9 +149,6 @@ docker run --name node1 -d -p 3333:3000 mio-node-api:latest
 
 docker pull python:3
 docker pull node 
-
-
-
 ```
 
 

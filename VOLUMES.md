@@ -2,12 +2,12 @@
 Creo un container ubuntu contenente una cartella /test mappata con un volume `volumeuno` di Docker
 ```bash
 docker run -it --name container1 -v volumeuno:/test ubuntu bash
-ls # ha creato la cartella /test
+ls       # ha creato la cartella /test dentro il container
 touch /test/primofile.txt
 ```
 `CTRL+P` e `CTRL+Q` (esco lasciando in esecuzione)
 ```bash
-docker ps # container1 in esecuzione
+docker ps        # container1 in esecuzione
 docker volume ls # volumeuno è segnalato
 ```
 
@@ -20,9 +20,8 @@ touch /test/secondofile.txt
 `CTRL+P` e `CTRL+Q` (esco lasciando in esecuzione)
 
 ```bash
-docker ps # due container
-docker volume ls # sempre un volume
-
+docker ps                       # due container
+docker volume ls                # sempre un volume (è condiviso tra i due container)
 docker exec -it container1 bash # rientro nel container1 e se controllo, in /test ci son 2 file
 ```
 

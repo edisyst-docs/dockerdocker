@@ -20,10 +20,8 @@ docker inspect redis    # per vedere i layers di cui è composta l'immagine
 
 docker pull ninjacloud/repository-1/immagine:latest # scarica da repository non ufficiale
 
-
 docker image ls # lista immagini scaricate
 docker images   # UGUALE
-
 
 docker image rm pippo # rimuove l'immagine pippo
 docker rmi pippo      # UGUALE
@@ -58,15 +56,10 @@ docker <comando>
 ## Avvia container: docker run
 Appena installato Docker, posso provare subito:
 ```bash
-docker run hello-world           # avvia un container dell'immagine hello-world
-docker container run hello-world # UGUALE
+docker run hello-world                   # avvia un container dell'immagine hello-world
+docker run -it hello-world --name=hello  # UGUALE ma gli dò anche un nome
 ```
 Se non ho mai scaricato l'immagine, lo fa lui in automatico, poi crea+avvia un container di quest'immagine
-
-Questi container si avviano e si stoppano all'istante. Normalmente avvio un container per utilizzarne un servizio/app
-```bash
-docker run <image> <app>
-```
 
 ## docker ps
 ```bash
@@ -79,24 +72,24 @@ docker ps --format=$FORMAT
 
 docker ps -a        # mostra anche i container stopped
 
-
 docker container kill nifty_feistel # stoppa il container nifty_feistel
 docker container rm   nifty_feistel # rimuove il container nifty_feistel
 ```
+
+Questi container si avviano e si stoppano all'istante. Normalmente avvio un container per utilizzarne un servizio/app
 ```bash
-docker run -it alpine /bin/sh # -it collega il mio terminale a quello del container
-docker run -it ubuntu bash    # avvia la console bash su ubuntu
-ps -elf                       #  dice i processi attivi in quel container (solo la bash)
+docker run <image> <app>       # avvia un container dell'immagine <image> e l'app <app>
+docker run -it alpine /bin/sh  # -it collega il mio terminale a quello del container
+docker run -it ubuntu bash     # avvia la console bash su ubuntu
+ps -elf                        #  dice i processi attivi in quel container (solo la bash)
 
-
-docker run alpine         # si avvia e si ferma, perchè non ho richiesto nessun servizio
-docker run alpine sleep 5 # si avvia e rimane in running per 5 sec, poi si ferma
-docker run --name=docker_uno alpine sleep 10 # gli posso dare io il nome
+docker run alpine              # si avvia e si ferma, perchè non ho richiesto nessun servizio
+docker run alpine sleep 5      # si avvia e rimane in running per 5 sec, poi si ferma
 ```
 
 ## Container in background
 ```bash
-docker run -d -it ubuntu bin/bash # -d per avviarlo in background
+docker run -d -it ubuntu bin/bash              # -d (DETACH) per avviarlo in background
 docker run -d -it --name=gino ubuntu bin/bash
 ```
 
@@ -105,8 +98,11 @@ docker run -d -it --name=gino ubuntu bin/bash
 docker run -it ubuntu bin/bash # avvia una console bash
 docker run -it ubuntu bin/sh   # avvia una console sh
 ```
-In una delle due creo un file con touch PIPPO, così da riconoscerla
-CTRL+P seguito da CTRL+Q mi fa uscire dalla shell di ubuntu senza stoppare però il container
+In una delle due creo un file con `touch PIPPO`, così da distinguerla dall'altra
+
+> CTRL+P seguito da CTRL+Q mi fa uscire dalla shell del container senza stopparlo  
+> CTRL+D mi farebbe uscire e stoppar il container
+
 ```bash
 docker ps # ho ancora 2 container in running
 ```
@@ -139,7 +135,7 @@ docker container prune # elimina tutti i container non in running
 docker commit # per committare sul proprio docker.hub
 
 docker export suspicious_davinci > ubuntu.zip # posso esportare un container per passarlo a qualcuno
-docker import - mio_ubuntu < ubuntu.zip #@ così lo importo. OVVIAMENTE HA SENSO FARLO SOLO PER CONTAINER PERSONALIZZATI
+docker import - mio_ubuntu < ubuntu.zip       # così lo importo. OVVIAMENTE HA SENSO SOLO PER CONTAINER PERSONALIZZATI
 ```
 
 ## Policy di restart dei container
@@ -184,8 +180,7 @@ docker run -d --name RedisHostPort -p 6379:6379 redis:latest # qui ho fatto il m
 
 ```bash
 docker ps -q | docker stats # -q mostra solo gli ID; se ho più container in running, così li monitoro tutti
-docker stats container_x # è come lanciare questo su tutti i container contemporaneamente
-
+docker stats container_x    # è come lanciare questo su tutti i container contemporaneamente
 
 docker ps --format 'Il container {{.Names}} stà usando la immagine {{.Image}}' # formattazione dei dati
 docker ps --format 'table {{.Names}} \t {{.Image}}' # li mostra in tabella
