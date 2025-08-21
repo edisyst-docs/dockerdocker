@@ -31,8 +31,8 @@ docker exec -it container1 bash # rientro nel container1 e se controllo, in /tes
 ```bash
 docker pull jenkins/jenkins:lts
 
-:lts
-# mi deve restituire la password di accesso per la config - f772b6836f15487d9f3c27e7089e14cc
+docker run -p 8080:8080 -p 50000:50000 --name jenkinsprimo -v volumeJenkins:/var/jenkins_home jenkins/jenkins:lts
+# mi deve restituire la password di accesso per la config - DEVO SALVARMELA - f772b6836f15487d9f3c27e7089e14cc
 ```
 Potrei fare inizialmente `docker volume create volumeTest` ma posso fare anche tutto in un'unica riga
 
@@ -43,7 +43,7 @@ Potrei fare inizialmente `docker volume create volumeTest` ma posso fare anche t
 
 Non chiudo il browser, apro un nuovo cmd/powershell e digito
 ```bash
-docker run -p 8081:8080 -p 50001:50000 --name jenkins2 -v volumeJenkins:/var/jenkins_home jenkins/jenkins:lts
+docker run -p 8081:8080 -p 50001:50000 --name jenkinssecondo -v volumeJenkins:/var/jenkins_home jenkins/jenkins:lts
 # non mi deve restituire la password se ho scritto tutto correttamente perchè è lo stesso Jenkins, stessa password quindi
 ```
 Su `localhost:8081` non mi chiede la config, faccio login con `Admin` - `password_restituita` e trovo lo stesso job di prima
