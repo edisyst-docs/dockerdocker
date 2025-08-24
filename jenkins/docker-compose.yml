@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  jenkins-master:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: jenkins-master
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - ./jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - jenkins-net
+    user: root
+
+  agent1:
+    image: jenkins/inbound-agent:latest
+    container_name: jenkins-agent1
+    networks:
+      - jenkins-net
+    environment:
+      - JENKINS_URL=http://jenkins-master:8080
+      - JENKINS_AGENT_NAME=agent1
+      - JENKINS_SECRET=8f8ba36915ac097eaa7b97076275539a7c5febeada4f9d14319dd434e43977f2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - jenkins-master
+
+  agent2:
+    image: jenkins/inbound-agent:latest
+    container_name: jenkins-agent2
+    networks:
+      - jenkins-net
+    environment:
+      - JENKINS_URL=http://jenkins-master:8080
+      - JENKINS_AGENT_NAME=agent2
+      - JENKINS_SECRET=e5ad422c641ae96501f8946548613427228824dba016677a8021642dc909d8c2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - jenkins-master
+
+  agent3:
+    image: jenkins/inbound-agent:latest
+    container_name: jenkins-agent3
+    networks:
+      - jenkins-net
+    environment:
+      - JENKINS_URL=http://jenkins-master:8080
+      - JENKINS_AGENT_NAME=agent3
+      - JENKINS_SECRET=1164b7a92dde157bb92d04e1ff48d03bba8cc8bede5b5defe8ded396f1921e67
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - jenkins-master
+
+networks:
+  jenkins-net:
+    driver: bridge

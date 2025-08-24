@@ -1,3 +1,4 @@
+# Esecizio solo col Jenkinsfile
 Qui l'idea sarebbe:
 - Installa Jenkins su un VPS acquistato (io stò usando un Docker per gioco)
 - Clona un mio repo da Github (contiene il Dockerfile)
@@ -6,6 +7,56 @@ Qui l'idea sarebbe:
 - Crea il container sul VPS
 - Se faccio modifiche in locale sul repo, le committo e con la pipeline mi ricreo il container aggiornato
 
+
+
+# Esercizio con docker-compose
+```bash
+# Build e avvio
+docker-compose up -d --build
+
+# Visualizzare logs
+docker-compose logs -f
+
+# Fermare tutto
+docker-compose down
+
+# Riavviare
+docker-compose restart
+``` 
+### Configurazione iniziale
+1. Accedi a http://localhost:8080
+2. La password iniziale si trova in: jenkins_home/secrets/initialAdminPassword
+3. Configura gli agenti dalla web UI (Manage Jenkins → Manage Nodes)
+
+### Jenkinsfile esempio multi-agente
+```groovy
+pipeline {
+    agent none
+    stages {
+        stage('Build on Agent1') {
+            agent { label 'agent1' }
+            steps { 
+                echo "Building on agent1"
+                sh 'hostname'
+            }
+        }
+        stage('Test on Agent2') {
+            agent { label 'agent2' }
+            steps { 
+                echo "Testing on agent2"
+                sh 'hostname'
+            }
+        }
+        stage('Deploy on Agent3') {
+            agent { label 'agent3' }
+            steps { 
+                echo "Deploying on agent3"
+                sh 'hostname'
+            }
+        }
+    }
+}
+```
 
 # Introduzione a Groovy per Jenkinsfile
 Groovy è un linguaggio di scripting dinamico per la Java Virtual Machine (JVM) che combina 
