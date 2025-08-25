@@ -28,7 +28,7 @@ Spiegazione delle opzioni aggiunte:
 Devo installare almeno git nel container di Jenkins
 ```bash
 # Trova il container
-docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Status}}"
+docker ps -a --format "table {{.ID}}\t{{.Names}}\t{{.Status}}"
 
 # Entra come root (sostituisci <NAME_OR_ID>)
 docker exec -u 0 -it <NAME_OR_ID> bash
