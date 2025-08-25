@@ -15,42 +15,48 @@ services:
     user: root
 
   agent1:
-    image: jenkins/inbound-agent:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: jenkins-agent1
     networks:
       - jenkins-net
     environment:
       - JENKINS_URL=http://jenkins-master:8080
       - JENKINS_AGENT_NAME=agent1
-      - JENKINS_SECRET=d443fe8d613f874fa1e2ea45fcf7851474576740185d76955895c5813afb7bf2
+      - JENKINS_SECRET=d4096efa8d13596577450eabdaf932f9a7408c4f26b22afb61d1c80a917cdd69
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - jenkins-master
 
   agent2:
-    image: jenkins/inbound-agent:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: jenkins-agent2
     networks:
       - jenkins-net
     environment:
       - JENKINS_URL=http://jenkins-master:8080
       - JENKINS_AGENT_NAME=agent2
-      - JENKINS_SECRET=d1dc0c7dc148ce9a3e65af25c03133aac9d3e739a029f84a58f9b514654474b6
+      - JENKINS_SECRET=ffe7610a82e2ea7bc2c3aae461a99ea3f3f1524d611b681e1e94525a8291b589
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - jenkins-master
 
   agent3:
-    image: jenkins/inbound-agent:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: jenkins-agent3
     networks:
       - jenkins-net
     environment:
       - JENKINS_URL=http://jenkins-master:8080
       - JENKINS_AGENT_NAME=agent3
-      - JENKINS_SECRET=7bffd9a593d777e2228532c69c660e47069adc4008e33dab25695316b32c2b57
+      - JENKINS_SECRET=27ec6a3a6ea9ce1e857708b9ec962e6b7203d89871493fd80aad8a02b93e0001
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:

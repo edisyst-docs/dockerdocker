@@ -1,24 +1,45 @@
-# Esecizio solo col Jenkinsfile
-Qui l'idea sarebbe:
-- Installa Jenkins su un VPS acquistato (io stò usando un Docker per gioco)
-- Clona un mio repo da Github (contiene il Dockerfile)
-- Crea l'immagine sul mio Docker Hub
-- Deploya l'immagine sul VPS
-- Crea il container sul VPS
-- Se faccio modifiche in locale sul repo, le committo e con la pipeline mi ricreo il container aggiornato
-
-
-
 # Esercizio con docker-compose multi-agente
+Ho un master e 3 nodi/agenti/slave con installato Git e Docker. 
+Così possono lanciare i comandi git, docker. In alternativa dovrei entrare in ogni nodo e installarli a mano
 ```bash
-# Build inizialmente solo del master
+# Build delle immagini, senza avviarle
+docker-compose build
+
+# Avvio del master (prima volta)
 docker-compose up -d jenkins-master
 
 # Recupero password iniziale
 docker exec jenkins-master cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
+### Configurazione iniziale
+Setup dopo l'avvio:
+1. Accedi a http://localhost:8080
+2. Installa plugin manualmente:
+    - Vai in "Manage Jenkins" → "Plugins" → "Available plugins"
+    - Cerca e installa: Pipeline, Git, GitHub, Docker Pipeline
+    - Riavvia Jenkins dopo l'installazione
+3. Configura agenti:
+    - Vai in "Manage Jenkins" → "Nodes" → "New Node"
+    - Per ogni agente (agent1, agent2, agent3):
+        - Nome: agent1, agent2, agent3
+        - Tipo: Permanent Agent
+        - Labels: agent1, agent2, agent3
+        - Remote root directory: `/home/jenkins/agent`
+        - Launch method: "Launch agent via execution of command on the master"
+    - Dopo averlo creato, recuperare il `secret` e incollarlo nel `docker-compose.yml
+
+```bash
+# Dopo aver configurato i nodi agent1 agent2 agent3 nella UI e copiato i rispttivi secret nel docker-compose.yml:
+docker-compose up -d agent1 agent2 agent3
+
+# Verifica che tutto funzioni
+docker exec jenkins-agent1 docker --version
+docker exec jenkins-agent1 git --version
+
 
 # Visualizzare logs
-docker-compose logs -f jenkins-master
+docker-compose logs -f
 
 # Fermare tutto
 docker-compose down
@@ -27,22 +48,7 @@ docker-compose down
 docker-compose restart
 ``` 
 
-Setup dopo l'avvio:
-1. Accedi a http://localhost:8080
-2. Installa plugin manualmente:
-   - Vai in "Manage Jenkins" → "Plugins" → "Available plugins"
-   - Cerca e installa: Pipeline, Git, GitHub, Docker Pipeline
-   - Riavvia Jenkins dopo l'installazione
-3. Configura agenti:
-   - Vai in "Manage Jenkins" → "Nodes" → "New Node"
-   - Per ogni agente (agent1, agent2, agent3):
-     - Nome: agent1, agent2, agent3
-     - Tipo: Permanent Agent
-     - Labels: agent1, agent2, agent3
-     - Remote root directory: `/home/jenkins/agent`
-     - Launch method: "Launch agent via execution of command on the master"
-   - Dopo averlo creato, recuperare il `secret` e incollarlo nel `docker-compose.yml
-
+Provare questo script nella pipeline
 ```groovy
 pipeline {
     agent none
@@ -72,26 +78,50 @@ pipeline {
 }
 ```
 
+Provare un Jenkinsfile
+```groovy
+pipeline {
+    agent {
+        label 'agent1'
+    }
+    stages {
+        stage('Checkout Git') {
+            steps {
+                git branch: 'master', 
+                    url: 'https://github.com/edisyst/estensioni-chrome.git'
+                sh 'git status'
+            }
+        }
+        
+        stage('Build with Docker') {
+            steps {
+                script {
+                    // Build semplice senza compose
+                    sh 'docker build -t my-app .'
+                }
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                // Esegui container direttamente con docker run
+                sh 'docker run --rm my-app npm test'
+            }
+        }
+    }
+}
+```
 
 
-# Esercizio con docker-compose (da scrivere ancora, vorrei fare un docker più complesso coi volumi condivisi)
-```bash
-# Build e avvio
-docker-compose up -d --build
 
-# Visualizzare logs
-docker-compose logs -f
-
-# Fermare tutto
-docker-compose down
-
-# Riavviare
-docker-compose restart
-``` 
-### Configurazione iniziale
-1. Accedi a http://localhost:8080
-2. La password iniziale si trova in: jenkins_home/secrets/initialAdminPassword
-3. Configura gli agenti dalla web UI (Manage Jenkins → Manage Nodes)
+# Esecizio solo col Jenkinsfile
+Qui l'idea sarebbe:
+- Installa Jenkins su un VPS acquistato (io stò usando un Docker per gioco)
+- Clona un mio repo da Github (contiene il Dockerfile)
+- Crea l'immagine sul mio Docker Hub
+- Deploya l'immagine sul VPS
+- Crea il container sul VPS
+- Se faccio modifiche in locale sul repo, le committo e con la pipeline mi ricreo il container aggiornato
 
 
 
