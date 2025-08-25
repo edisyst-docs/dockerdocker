@@ -1,3 +1,134 @@
+# Esercizio più semplice con docker inline
+Con questo container ho solo un master Jenkins che condivide un volume dati, il binario e il sock di Docker. 
+```bash  
+docker run -d \
+  --name jenkinsprimo \
+  -p 8081:8080 \
+  -p 50001:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(which docker):/usr/bin/docker \
+  -v /home/$USER/jenkins_data:/home/jenkins_data \
+  --restart unless-stopped \
+  --user root \
+  -e JAVA_OPTS="-Djenkins.install.runSetupWizard=false" \
+  jenkins/jenkins:lts-jdk17
+```  
+
+Spiegazione delle opzioni aggiunte:
+`-d` - Esegui il container in background (detached mode)
+`-v /var/run/docker.sock:/var/run/docker.sock` - Permette a Jenkins di usare Docker dal container (Docker-in-Docker)
+`-v $(which docker):/usr/bin/docker` - Condivide il binario Docker
+`-v /home/$USER/jenkins_data:/home/jenkins_data` - Cartella per salvare Jenkinsfile e script
+`--restart unless-stopped` - Riavvio automatico del container
+`--user root` - Evita problemi di permessi
+`-e JAVA_OPTS="..."` - Disabilita setup wizard (utile per testing)
+
+
+Devo installare almeno git nel container di Jenkins
+```bash
+# Trova il container
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Status}}"
+
+# Entra come root (sostituisci <NAME_OR_ID>)
+docker exec -u 0 -it <NAME_OR_ID> bash
+
+# Installa gli strumenti base
+apt-get update && apt-get install -y git tar
+
+# Crea una directory per i tuoi dati:
+mkdir -p ~/jenkins_data
+```
+
+Installa i plugin necessari:
+- Pipeline
+- Pipeline: Stage View
+- Docker Pipeline
+- Git
+- Blue Ocean (opzionale)
+
+### Crea il Job Pipeline “estensioni-chrome”
+- Jenkins → New Item → Pipeline → nome: estensioni-chrome.
+- Pipeline → Definition: Pipeline script from SCM
+  - SCM: Git
+  - Repository URL: https://github.com/edisyst/estensioni-chrome.git
+  - Branch: main
+-Jenkins leggerà il Jenkinsfile dal repo: quindi adesso lo aggiungiamo.
+
+
+Su  `https://github.com/edisyst/estensioni-chrome.git` ho creato un Jenkinsfile che crea una pipeline con parametri
+```groovy
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'APP_NAME', defaultValue: 'estensioni-chrome', description: 'Nome del pacchetto')
+        booleanParam(name: 'DO_PACKAGE', defaultValue: true, description: 'Creare il pacchetto?')
+    }
+
+    stages {
+        stage('Quality Checks') {
+            parallel {
+                stage('Lint') {
+                    steps {
+                        sh 'echo "Simulazione lint"'
+                    }
+                }
+                stage('Unit Tests') {
+                    steps {
+                        sh 'echo "Simulazione test unitari"'
+                    }
+                }
+                stage('Security Scan') {
+                    steps {
+                        sh 'echo "Simulazione scan sicurezza"'
+                    }
+                }
+            }
+        }
+        
+        stage('Checkout') {
+            steps { checkout scm }
+        }
+
+        stage('Custom Logic') {
+            steps {
+                script {
+                    def slugify = { str -> str.toLowerCase().replaceAll('[^a-z0-9-]', '-') }
+                    echo "Slug di APP_NAME = ${slugify(params.APP_NAME)}"
+                }
+            }
+        }
+
+        stage('Package') {
+            when {
+                expression { return params.DO_PACKAGE }
+            }
+            steps {
+                script {
+                    def gitSha = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    env.PACKAGE_NAME = "${params.APP_NAME}.${gitSha}.tar.gz"
+                    sh "tar --exclude=${env.PACKAGE_NAME} -czf ${env.PACKAGE_NAME} ."
+                }
+            }
+        }
+
+        stage('Archive') {
+            when { expression { fileExists(env.PACKAGE_NAME ?: '') } }
+            steps {
+                archiveArtifacts artifacts: "${env.PACKAGE_NAME}"
+            }
+        }
+    }
+}
+```
+Cosa impari qui:
+checkout scm: porta il codice nel workspace.
+script { ... }: blocco Groovy per usare variabili, liste, logica.
+
+
+
+
 # Esercizio con docker-compose multi-agente
 Ho un master e 3 nodi/agenti/slave con installato Git e Docker. 
 Così possono lanciare i comandi git, docker. In alternativa dovrei entrare in ogni nodo e installarli a mano
