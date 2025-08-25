@@ -9,13 +9,16 @@ Qui l'idea sarebbe:
 
 
 
-# Esercizio con docker-compose
+# Esercizio con docker-compose multi-agente
 ```bash
-# Build e avvio
-docker-compose up -d --build
+# Build inizialmente solo del master
+docker-compose up -d jenkins-master
+
+# Recupero password iniziale
+docker exec jenkins-master cat /var/jenkins_home/secrets/initialAdminPassword
 
 # Visualizzare logs
-docker-compose logs -f
+docker-compose logs -f jenkins-master
 
 # Fermare tutto
 docker-compose down
@@ -23,12 +26,23 @@ docker-compose down
 # Riavviare
 docker-compose restart
 ``` 
-### Configurazione iniziale
-1. Accedi a http://localhost:8080
-2. La password iniziale si trova in: jenkins_home/secrets/initialAdminPassword
-3. Configura gli agenti dalla web UI (Manage Jenkins → Manage Nodes)
 
-### Jenkinsfile esempio multi-agente
+Setup dopo l'avvio:
+1. Accedi a http://localhost:8080
+2. Installa plugin manualmente:
+   - Vai in "Manage Jenkins" → "Plugins" → "Available plugins"
+   - Cerca e installa: Pipeline, Git, GitHub, Docker Pipeline
+   - Riavvia Jenkins dopo l'installazione
+3. Configura agenti:
+   - Vai in "Manage Jenkins" → "Nodes" → "New Node"
+   - Per ogni agente (agent1, agent2, agent3):
+     - Nome: agent1, agent2, agent3
+     - Tipo: Permanent Agent
+     - Labels: agent1, agent2, agent3
+     - Remote root directory: `/home/jenkins/agent`
+     - Launch method: "Launch agent via execution of command on the master"
+   - Dopo averlo creato, recuperare il `secret` e incollarlo nel `docker-compose.yml
+
 ```groovy
 pipeline {
     agent none
@@ -57,6 +71,29 @@ pipeline {
     }
 }
 ```
+
+
+
+# Esercizio con docker-compose (da scrivere ancora, vorrei fare un docker più complesso coi volumi condivisi)
+```bash
+# Build e avvio
+docker-compose up -d --build
+
+# Visualizzare logs
+docker-compose logs -f
+
+# Fermare tutto
+docker-compose down
+
+# Riavviare
+docker-compose restart
+``` 
+### Configurazione iniziale
+1. Accedi a http://localhost:8080
+2. La password iniziale si trova in: jenkins_home/secrets/initialAdminPassword
+3. Configura gli agenti dalla web UI (Manage Jenkins → Manage Nodes)
+
+
 
 # Introduzione a Groovy per Jenkinsfile
 Groovy è un linguaggio di scripting dinamico per la Java Virtual Machine (JVM) che combina 
@@ -131,19 +168,19 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                sh 'make' // Esegue comando shell
+                sh "date '+%d-%m-%Y --- %H:%M:%S'" // Esegue comando shell
             }
         }
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh 'make test'
+                sh "date '+%d-%m-%Y --- %H:%M:%S'" // Esegue comando shell
             }
         }
         stage('Deploy') {
             steps {
                 echo 'Deploying...'
-                sh 'make deploy'
+                sh "date '+%d-%m-%Y --- %H:%M:%S'" // Esegue comando shell
             }
         }
     }

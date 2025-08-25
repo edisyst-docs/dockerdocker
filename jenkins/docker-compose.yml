@@ -22,7 +22,7 @@ services:
     environment:
       - JENKINS_URL=http://jenkins-master:8080
       - JENKINS_AGENT_NAME=agent1
-      - JENKINS_SECRET=8f8ba36915ac097eaa7b97076275539a7c5febeada4f9d14319dd434e43977f2
+      - JENKINS_SECRET=d443fe8d613f874fa1e2ea45fcf7851474576740185d76955895c5813afb7bf2
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
@@ -36,7 +36,7 @@ services:
     environment:
       - JENKINS_URL=http://jenkins-master:8080
       - JENKINS_AGENT_NAME=agent2
-      - JENKINS_SECRET=e5ad422c641ae96501f8946548613427228824dba016677a8021642dc909d8c2
+      - JENKINS_SECRET=d1dc0c7dc148ce9a3e65af25c03133aac9d3e739a029f84a58f9b514654474b6
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
@@ -50,7 +50,7 @@ services:
     environment:
       - JENKINS_URL=http://jenkins-master:8080
       - JENKINS_AGENT_NAME=agent3
-      - JENKINS_SECRET=1164b7a92dde157bb92d04e1ff48d03bba8cc8bede5b5defe8ded396f1921e67
+      - JENKINS_SECRET=7bffd9a593d777e2228532c69c660e47069adc4008e33dab25695316b32c2b57
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
